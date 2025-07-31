@@ -3,9 +3,10 @@ import React, { useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '@/featrues/user/UserSlice';
 import { FaClipboardList, FaSpinner, FaPlus, FaSignOutAlt } from 'react-icons/fa';
-import type { Task } from '@/featrues/task/taskApi';
-import { useNavigate } from 'react-router-dom';  // import useNavigate
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
+import type { Task } from '@/featrues/task/taskApi';
 import TaskList from './TaskList';
 import TaskForm from './TaskForm';
 import SpinningWheel from './SpinningWheel';
@@ -13,8 +14,7 @@ import TaskDetails from './TaskDetails';
 
 const Dashboard: React.FC = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();  // initialize navigate
-
+  const navigate = useNavigate();
   const user = useSelector((state: any) => state.user.user);
 
   const [filterStatus, setFilterStatus] = useState<string>('pending');
@@ -25,8 +25,20 @@ const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'tasks' | 'spin' | 'details'>('tasks');
 
   const handleCancel = useCallback(() => {
-    setShowForm(false);
-    setEditingTask(null);
+    Swal.fire({
+      title: 'Discard changes?',
+      text: 'Unsaved task changes will be lost!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Discard',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setShowForm(false);
+        setEditingTask(null);
+      }
+    });
   }, []);
 
   const handleShowDetails = (task: Task) => {
@@ -40,8 +52,20 @@ const Dashboard: React.FC = () => {
   };
 
   const handleLogout = () => {
-    dispatch(logout());
-    navigate('/login');  // redirect to login after logout
+    Swal.fire({
+      title: 'Are you sure you want to logout?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, logout',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#d33',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(logout());
+        Swal.fire('Logged out', 'You have been logged out successfully.', 'success');
+        navigate('/login');
+      }
+    });
   };
 
   return (
@@ -53,13 +77,19 @@ const Dashboard: React.FC = () => {
         </div>
         <div className="flex items-center gap-6 mt-4 md:mt-0">
           <button
-            onClick={() => setActiveTab('tasks')}
+            onClick={() => {
+              setActiveTab('tasks');
+              Swal.fire('Task Tab Active', 'You are now viewing tasks.', 'info');
+            }}
             className={`flex items-center gap-2 ${activeTab === 'tasks' ? 'text-green-400' : 'text-white'}`}
           >
             <FaClipboardList /> Task List
           </button>
           <button
-            onClick={() => setActiveTab('spin')}
+            onClick={() => {
+              setActiveTab('spin');
+              Swal.fire('Spin Tab Active', 'Spin your task randomly!', 'info');
+            }}
             className={`flex items-center gap-2 ${activeTab === 'spin' ? 'text-green-400' : 'text-white'}`}
           >
             <FaSpinner className="animate-spin" /> Spin
