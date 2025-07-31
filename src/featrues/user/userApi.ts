@@ -24,7 +24,7 @@ interface RegisterRequest extends LoginRequest {
 export const userApi = createApi({
   reducerPath: 'userApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'http://localhost:5000/api/auth',
+    baseUrl: 'https://taskso-server.onrender.com/api/auth',
     prepareHeaders: (headers) => {
       const token = localStorage.getItem('token');
       if (token) {
